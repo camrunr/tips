@@ -81,6 +81,6 @@ It should be noted that internal indexes (_internal, _introspection, _audit) and
 
 Above are 2 methods for tracking log volume. Hopefully they provide a good starting point for you to create your own.
 
-If you questions, spot a mistake, or have a recommendation, feel free to submit a PR.
+If you have questions, spot a mistake, or have a recommendation, feel free to submit a PR.
 
 Enjoy
