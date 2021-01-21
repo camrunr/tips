@@ -36,7 +36,7 @@ Here's a sample search using the metrics-fied data, giving me a weekly max-day r
 
 ## Metrics Logs ##    
 
-The metrics log will be all Indexers and *usually* on Forwarders. It offers a "close enough" approximation of usage if you're mindful. Both sending Forwarders and receiving Indexers log metrics data, so it's important to make sure you're only calculating from one side or the other. Stats are tracked by host, source, sourcetype, and index. There is no cross-referencing in this file (ie, each event represents exactly one value of the type it is tracking; there is no way to grab how many MBs were logged to sourcetype_A and index_1).  
+The metrics log will be produced on all Indexers and *usually* on Forwarders. It offers a "close enough" approximation of usage if you're mindful. Both sending Forwarders and receiving Indexers log metrics data, so it's important to make sure you're only calculating from one side or the other. Stats are tracked by host, source, sourcetype, and index. There is no cross-referencing in this file (ie, each event represents exactly one value of the type it is tracking; there is no way to grab how many MBs were logged to sourcetype_A and index_1).  
  
 By default Splunk only tracks the top 10 of each type of metric in each 30 second post window. Example, it collects KBs sent, by index, for 30 seconds. When the 30 seconds is up, it writes an event for the top 10 indexes. This is adjustable in the limits.conf file (showing defaults below):
  
