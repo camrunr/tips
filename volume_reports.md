@@ -13,15 +13,15 @@ The type for this one is listed as "Usage". There's also a daily summary type ca
 The search below is what I use to collect volume stats hourly. NOTE: The final command sends the results into a metrics-type index called spl_metrics for later use. I have this index set for much longer retention than the _internal index.
 
 ```
-   index=_internal source=*/license_usage.log host IN (license_servers)
-    | addinfo
-    | stats min(info_min_time) as _time sum(b) as B by h idx pool
-    | eval _value=round(B/1024/1024,0),
-           idx=if(idx=="","n/a",idx),
-           h=if(h=="","n/a",h),
-           metric_name="license.MB"
-    | fields - B
-    | mcollect index="spl_metrics"
+index=_internal source=*/license_usage.log host IN (license_servers)
+| addinfo
+| stats min(info_min_time) as _time sum(b) as B by h idx pool
+| eval _value=round(B/1024/1024,0),
+       idx=if(idx=="","n/a",idx),
+       h=if(h=="","n/a",h),
+       metric_name="license.MB"
+| fields - B
+| mcollect index="spl_metrics"
 ```
 
 In my environment this results in about 25,000 entries per run. If I include st (sourcetype) in the split, that jumps about 4x. YMWV. You may also to decide to have separate searches for the different split bys, rather than one. I like having the capability to report on combos of host, pool and index, so this works for me.
@@ -29,8 +29,8 @@ In my environment this results in about 25,000 entries per run. If I include st 
 Here's a sample search using the metrics-fied data, giving me a weekly max-day reading by pool. A 1 year run returns very quickly:
 
 ```
-    | mstats sum(license.MB) as mb_used  where index=spl_metrics span=1d by pool
-    | timechart span=7d max(eval(mb_used/1024)) as GB by pool
+| mstats sum(license.MB) as mb_used  where index=spl_metrics span=1d by pool
+| timechart span=7d max(eval(mb_used/1024)) as GB by pool
 ```
 
 
@@ -56,21 +56,21 @@ You can query Forwarder hosts for metrics logs and that will give you higher car
 In this sample below I'm using "per_index_thruput". I'd have this scheduled to run hourly. Substitute host, source, or sourcetype as appropriate. The series field will represent the name of the particular index represented. Also, as with the license version above, I've included the mcollect command to send the results back into Splunk for later use.
  
 ```
-    index=_internal source=*/metrics.log* group=per_index_thruput host IN (indexerlist)
-    | addinfo
-    | stats min(info_min_time) as _time sum(kb) as KB by series
-    | rename series as idx
-    | eval _value=round(KB/1024,0),
-           metric_name="volume.MB"
-    | fields - KB
-    | mcollect index="spl_metrics"
+index=_internal source=*/metrics.log* group=per_index_thruput host IN (indexerlist)
+| addinfo
+| stats min(info_min_time) as _time sum(kb) as KB by series
+| rename series as idx
+| eval _value=round(KB/1024,0),
+       metric_name="volume.MB"
+| fields - KB
+| mcollect index="spl_metrics"
 ```
 
 Here's a sample search using the metrics-fied metrics.log data, giving me a weekly max-day reading by index:
 
 ```
-    | mstats sum(volume.MB) as mb_used  where index=spl_metrics span=1d by idx
-    | timechart span=7d max(eval(mb_used/1024)) as GB by idx
+| mstats sum(volume.MB) as mb_used  where index=spl_metrics span=1d by idx
+| timechart span=7d max(eval(mb_used/1024)) as GB by idx
 ```
 
 I'd recommend running separate reports by index, host and maybe sourcetype. Source is less useful as log file names can get pretty unique, so you end up with thousands upon thousands of entries (and hit the limit discussed above). Not great.
